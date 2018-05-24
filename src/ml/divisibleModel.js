@@ -3,7 +3,9 @@ import { range } from "lodash";
 
 export const createDivisibleModel = () => {
   const model = tf.sequential();
-  model.add(tf.layers.dense({ units: 2, inputShape: 1 }));
+  model.add(
+    tf.layers.dense({ units: 2, inputShape: 1, activation: "softmax" })
+  );
   return model;
 };
 

@@ -19,7 +19,20 @@ export default () => {
     // await trainFizzBuzzModel(fizzBuzzModel)();
   };
 
-  const startInferrence = async () => {
+  const startDivisibilityInferrence = async () => {
+    for (let i = 30000; i <= 30100; i++) {
+      const data = await divBy3Model.predict(tf.tensor([[i]])).data();
+      const [divisible, notDivisible] = data;
+      const isCategory = prob => prob > 0.9;
+      console.log(
+        `${i}: `,
+        isCategory(divisible) ? "true" : "false",
+        i % 3 === 0 ? "true" : "false"
+      );
+    }
+  };
+
+  const startFizzBuzzInferrence = async () => {
     for (let i = 30000; i <= 30100; i++) {
       const data = await fizzBuzzModel
         .predict(tf.tensor([[Number(i % 3 === 0), Number(i % 5 === 0)]]))
@@ -43,8 +56,14 @@ export default () => {
         <img src={logo} className="App-logo" alt="logo" />
         <h1 className="App-title">Welcome to React</h1>
       </header>
-      <button onClick={() => startTraining()}> Train </button>
-      <button onClick={() => startInferrence()}> Infer </button>
+      <div>
+        <button onClick={startTraining}> Train </button>
+        <button onClick={startDivisibilityInferrence}> Infer </button>
+      </div>
+      <div>
+        <button onClick={startTraining}> Train </button>
+        <button onClick={startDivisibilityInferrence}> Infer </button>
+      </div>
     </div>
   );
 };
