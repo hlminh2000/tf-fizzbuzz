@@ -16,8 +16,12 @@ export default () => {
   const fizzBuzzModel = createFizzBuzzModel();
 
   const startTraining = async () => {
-    await trainDivisibleModel(divBy3Model)({ denom: 3 });
-    // await trainFizzBuzzModel(fizzBuzzModel)();
+    await Promise.all([
+      trainDivisibleModel(divBy3Model)({ denom: 3 }),
+      trainDivisibleModel(divBy5Model)({ denom: 5 }),
+      trainFizzBuzzModel(fizzBuzzModel)()
+    ]);
+    console.log("DONE!!!");
   };
 
   const startDivisibilityInferrence = async () => {
