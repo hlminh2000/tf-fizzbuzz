@@ -2,8 +2,15 @@ import * as tf from "@tensorflow/tfjs";
 import { range } from "lodash";
 import leftpad from "left-pad";
 
-const binarySize = 8;
-const maxDec = 255;
+const binarySize = 16;
+const maxDec = parseInt(
+  range(0, binarySize)
+    .map(() => 1)
+    .join(""),
+  2
+);
+
+window.range = range;
 
 export const decimalToBinaryArray = num =>
   leftpad(num.toString(2), binarySize, "0")
@@ -13,9 +20,13 @@ export const decimalToBinaryArray = num =>
 export const createDivisibleModel = () => {
   const model = tf.sequential();
   model.add(
-    tf.layers.dense({ units: 32, inputShape: binarySize, activation: "relu" })
+    tf.layers.dense({
+      units: binarySize,
+      inputShape: binarySize,
+      activation: "relu"
+    })
   );
-  model.add(tf.layers.dense({ units: 32, activation: "relu" }));
+  model.add(tf.layers.dense({ units: binarySize, activation: "relu" }));
   model.add(tf.layers.dense({ units: 2, activation: "softmax" }));
   return model;
 };
@@ -26,12 +37,14 @@ export const trainDivisibleModel = model => async ({
   denom = 1,
   cycles = 300,
   learningRate = 0.2,
-  trainingData = range(0, maxDec).map(num => {
-    return {
-      x: decimalToBinaryArray(num),
-      y: [Number(num % denom === 0), Number(num % denom !== 0)]
-    };
-  })
+  trainingData = range(0, maxDec)
+    .filter(() => Math.random() > 0.9)
+    .map(num => {
+      return {
+        x: decimalToBinaryArray(num),
+        y: [Number(num % denom === 0), Number(num % denom !== 0)]
+      };
+    })
 } = {}) => {
   const optimizer = tf.train.sgd(learningRate);
   model.compile({
