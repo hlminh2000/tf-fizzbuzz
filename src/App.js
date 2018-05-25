@@ -6,7 +6,8 @@ import {
   createFizzBuzzModel,
   trainFizzBuzzModel,
   createDivisibleModel,
-  trainDivisibleModel
+  trainDivisibleModel,
+  decimalToBinaryArray
 } from "./ml/index.js";
 
 export default () => {
@@ -20,8 +21,10 @@ export default () => {
   };
 
   const startDivisibilityInferrence = async () => {
-    for (let i = 30000; i <= 30100; i++) {
-      const data = await divBy3Model.predict(tf.tensor([[i]])).data();
+    for (let i = 0; i <= 255; i++) {
+      const data = await divBy3Model
+        .predict(tf.tensor([decimalToBinaryArray(i)]))
+        .data();
       const [divisible, notDivisible] = data;
       const isCategory = prob => prob > 0.9;
       console.log(

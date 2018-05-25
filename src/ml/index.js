@@ -1,2 +1,6 @@
 export { createFizzBuzzModel, trainFizzBuzzModel } from "./fizzBuzzModel";
-export { createDivisibleModel, trainDivisibleModel } from "./divisibleModel";
+export {
+  createDivisibleModel,
+  trainDivisibleModel,
+  decimalToBinaryArray
+} from "./divisibleModel";
