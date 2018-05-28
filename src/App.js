@@ -17,26 +17,37 @@ export default () => {
 
   const startTraining = async () => {
     await Promise.all([
-      trainDivisibleModel(divBy3Model)({ denom: 3 }),
-      trainDivisibleModel(divBy5Model)({ denom: 5 }),
-      trainFizzBuzzModel(fizzBuzzModel)()
+      trainDivisibleModel(divBy3Model)({ denom: 3 })
+      // trainDivisibleModel(divBy5Model)({ denom: 5 }),
+      // trainFizzBuzzModel(fizzBuzzModel)()
     ]);
     console.log("DONE!!!");
   };
 
-  const startDivisibilityInferrence = async () => {
-    for (let i = 0; i <= 255; i++) {
-      const data = await divBy3Model
-        .predict(tf.tensor([decimalToBinaryArray(i)]))
-        .data();
-      const [divisible, notDivisible] = data;
+  const inferDivisibilityBy = async num => {
+    const correct = [];
+    const max = 255;
+    for (let i = 0; i <= max; i++) {
+      const data = await divBy3Model.predict(tf.tensor([i])).data();
+      const [divisible] = data;
       const isCategory = prob => prob > 0.9;
+      if (isCategory(divisible) === (i % num === 0)) {
+        correct.push(num);
+      }
       console.log(
         `${i}: `,
         isCategory(divisible) ? "true" : "false",
-        i % 3 === 0 ? "true" : "false"
+        i % num === 0 ? "true" : "false"
       );
     }
+    console.log(`acuracy: ${correct.length / max * 100}%`);
+  };
+
+  const startDivisibilityInferrence = async () => {
+    console.log("divisibility by 3: ");
+    await inferDivisibilityBy(3);
+    console.log("divisibility by 5: ");
+    // await inferDivisibilityBy(5);
   };
 
   const startFizzBuzzInferrence = async () => {
