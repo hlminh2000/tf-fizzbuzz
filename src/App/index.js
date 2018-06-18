@@ -3,6 +3,7 @@ import "../App.css";
 import { withState, compose } from "recompose";
 import { ModelTrainer } from "../components/ModelTrainer";
 import createFizzBuzzCategoryTrainingData from "../scripts/createTrainingData";
+import * as tf from "@tensorflow/tfjs";
 import {
   divBy3Model,
   divBy5Model,
@@ -13,6 +14,9 @@ import {
   testFizzBuzzModel,
   generateTrainingData
 } from "./models";
+import { decimalToBinaryArray } from "../ml/divisibleModel";
+import Component from "react-component-component";
+import { range } from "lodash";
 
 export default compose(
   withState("isTraining", "setIsTraining", false),
@@ -185,6 +189,101 @@ export default compose(
             }
             disabled={isTraining}
           />
+        </div>
+        <div>
+          <h1>FizzBuzz Time!!!</h1>
+          <Component
+            initialState={{
+              from: 0,
+              to: 0,
+              fizzBuzzResult: []
+            }}
+          >
+            {({ state: { from, to, fizzBuzzResult }, setState }) => (
+              <div style={{ padding: 40 }}>
+                from:{" "}
+                <input
+                  type="number"
+                  value={from}
+                  onChange={({ target: { value } }) =>
+                    setState({ from: value })
+                  }
+                />{" "}
+                to:{" "}
+                <input
+                  type="number"
+                  value={to}
+                  onChange={({ target: { value } }) => setState({ to: value })}
+                />
+                <button
+                  onClick={async () => {
+                    const fizzBuzzInputs = (await Promise.all(
+                      range(from, to).map(num => {
+                        const binary = decimalToBinaryArray(num);
+                        return Promise.all(
+                          [divBy3Model, divBy5Model].map(model =>
+                            model.predict(tf.tensor([binary])).data()
+                          )
+                        ).then(modelResult =>
+                          modelResult.map(([divisibleProb]) => [
+                            num,
+                            divisibleProb
+                          ])
+                        );
+                      })
+                    )).map(([[num, divBy3Prob], [_, divBy5Prob]]) => ({
+                      input: num,
+                      output: [
+                        Number(divBy3Prob > 0.5),
+                        Number(divBy5Prob > 0.5)
+                      ]
+                    }));
+                    const fizzBuzzOutputs = (await Promise.all(
+                      fizzBuzzInputs.map(({ input, output }) =>
+                        fizzBuzzModel
+                          .predict(tf.tensor([output]))
+                          .data()
+                          .then(result => {
+                            return {
+                              input: input,
+                              output: result
+                            };
+                          })
+                      )
+                    ))
+                      .map(
+                        ({
+                          input,
+                          output: [nonProb, fizzProb, buzzProb, fizzBuzzProb]
+                        }) => ({
+                          input,
+                          output: [
+                            Number(nonProb > 0.5),
+                            Number(fizzProb > 0.5),
+                            Number(buzzProb > 0.5),
+                            Number(fizzBuzzProb > 0.5)
+                          ]
+                        })
+                      )
+                      .map(
+                        ({ input, output: [none, fizz, buzz, fizzBuzz] }) =>
+                          none
+                            ? input
+                            : fizz ? "fizz" : buzz ? "buzz" : "fizzBuzz"
+                      );
+                    setState({ fizzBuzzResult: fizzBuzzOutputs });
+                  }}
+                >
+                  FizzBUzz!!!
+                </button>
+                <div style={{ marginTop: 10 }}>
+                  {fizzBuzzResult.map((output, i) => (
+                    <div key={i}>{output}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Component>
         </div>
       </div>
     );
