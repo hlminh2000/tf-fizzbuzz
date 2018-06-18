@@ -1,5 +1,5 @@
 import React from "react";
-import { Line as LineChart } from "react-chartjs";
+import { Line as LineChart, Pie } from "react-chartjs-2";
 import { range } from "lodash";
 import ReactJson from "react-json-view";
 
@@ -7,16 +7,19 @@ export const ModelTrainer = ({
   modelLosses,
   onStartClick,
   onInferenceClick,
-  chartPoints = 10,
+  chartPoints = 100,
   disabled = false,
   trainingData,
+  testResult,
   generateTrainingSet = () => {}
 }) => (
   <div
     style={{
       display: "flex",
       flexDirection: "row",
-      justifyContent: "flex-start"
+      justifyContent: "center",
+      borderBottom: "solid 1px lightgrey",
+      padding: 20
     }}
   >
     <div>
@@ -34,7 +37,7 @@ export const ModelTrainer = ({
         <ReactJson src={trainingData} />
       </div>
     </div>
-    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       <LineChart
         data={{
           labels: range(
@@ -44,20 +47,20 @@ export const ModelTrainer = ({
           datasets: [
             {
               label: "Loss",
-              data: modelLosses.slice(
-                modelLosses.length - chartPoints,
-                modelLosses.length
-              )
+              data: modelLosses.filter(
+                (num, i) => i >= modelLosses.length - chartPoints
+              ),
+              backgroundColor: ["#FFCE56"]
             }
           ]
         }}
         options={{
           animation: {
-            durations: 10
+            duration: 200
           }
         }}
-        width="600"
-        height="250"
+        width={600}
+        height={250}
       />
       <div>
         <button disabled={disabled} onClick={onStartClick}>
@@ -69,6 +72,31 @@ export const ModelTrainer = ({
           Infer{" "}
         </button>{" "}
       </div>
+      <Pie
+        data={{
+          labels: ["Correct", "Incorrect"],
+          datasets: [
+            {
+              data: testResult.reduce(
+                (acc, { prediction, actual }) => [
+                  prediction === actual ? acc[0] + 1 : acc[0],
+                  prediction !== actual ? acc[1] + 1 : acc[1]
+                ],
+                [0, 0]
+              ),
+              backgroundColor: ["#36A2EB", "#FF6384"],
+              hoverBackgroundColor: ["#36A2EB", "#FF6384"]
+            }
+          ]
+        }}
+        width={600}
+        height={250}
+        options={{
+          animation: {
+            duration: 10
+          }
+        }}
+      />
     </div>
   </div>
 );

@@ -44,7 +44,7 @@ export const createDivisibleModel = () => {
       activation: "relu"
     })
   );
-  // model.add(tf.layers.dense({ units: 5, activation: "relu" }));
+  model.add(tf.layers.dense({ units: 5, activation: "relu" }));
   model.add(tf.layers.dense({ units: 2, activation: "softmax" }));
   return model;
 };
@@ -54,7 +54,7 @@ export const randBetween = (min, max) => Math.floor(Math.random() * max) + min;
 export const trainDivisibleModel = model => async ({
   denom = 1,
   cycles = 10,
-  learningRate = 0.5,
+  learningRate = 0.1,
   onCycleComplete = () => {},
   trainingData = range(0, maxDec)
     .filter(() => Math.random() > 0.7)
@@ -66,7 +66,6 @@ export const trainDivisibleModel = model => async ({
     })
 } = {}) => {
   const optimizer = tf.train.sgd(learningRate);
-  window.trainingData = trainingData;
   model.compile({
     optimizer: optimizer,
     loss: "categoricalCrossentropy",
@@ -83,7 +82,7 @@ export const trainDivisibleModel = model => async ({
     //   xs.reshape([trainingData.length, binarySize, 1, 1]).toString()
     // );
     onCycleComplete(await model.fit(xs, ys));
-    await wait(1000);
+    await wait(1500);
   }
   return model;
 };
