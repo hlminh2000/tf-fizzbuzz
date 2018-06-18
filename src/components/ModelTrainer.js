@@ -1,12 +1,12 @@
 import React from "react";
 import { Line as LineChart, Pie } from "react-chartjs-2";
+import { isEqual } from "lodash";
 import { range } from "lodash";
 import ReactJson from "react-json-view";
 
 export const ModelTrainer = ({
   modelLosses,
   onStartClick,
-  onInferenceClick,
   chartPoints = 100,
   disabled = false,
   trainingData,
@@ -24,7 +24,9 @@ export const ModelTrainer = ({
   >
     <div>
       <h4>Training data</h4>
-      <button onClick={generateTrainingSet}>Regenerate</button>
+      <button disabled={disabled} onClick={generateTrainingSet}>
+        Regenerate
+      </button>
       <div
         style={{
           width: 300,
@@ -62,16 +64,6 @@ export const ModelTrainer = ({
         width={600}
         height={250}
       />
-      <div>
-        <button disabled={disabled} onClick={onStartClick}>
-          {" "}
-          Train{" "}
-        </button>
-        <button disabled={disabled} onClick={onInferenceClick}>
-          {" "}
-          Infer{" "}
-        </button>{" "}
-      </div>
       <Pie
         data={{
           labels: ["Correct", "Incorrect"],
@@ -79,8 +71,8 @@ export const ModelTrainer = ({
             {
               data: testResult.reduce(
                 (acc, { prediction, actual }) => [
-                  prediction === actual ? acc[0] + 1 : acc[0],
-                  prediction !== actual ? acc[1] + 1 : acc[1]
+                  isEqual(prediction, actual) ? acc[0] + 1 : acc[0],
+                  !isEqual(prediction, actual) ? acc[1] + 1 : acc[1]
                 ],
                 [0, 0]
               ),
@@ -97,6 +89,11 @@ export const ModelTrainer = ({
           }
         }}
       />
+      <div>
+        <button disabled={disabled} onClick={onStartClick}>
+          Train
+        </button>
+      </div>
     </div>
   </div>
 );

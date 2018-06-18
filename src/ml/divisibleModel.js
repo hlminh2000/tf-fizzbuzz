@@ -12,7 +12,7 @@ export const maxDec = parseInt(
 
 window.range = range;
 
-const wait = ms =>
+export const wait = ms =>
   new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve();
@@ -26,17 +26,6 @@ export const decimalToBinaryArray = num =>
 
 export const createDivisibleModel = () => {
   const model = tf.sequential();
-  // model.add(
-  //   tf.layers.conv1d({
-  //     inputShape: [binarySize, 1],
-  //     kernelSize: 3,
-  //     filters: 8,
-  //     strides: 1,
-  //     activation: "relu",
-  //     kernelInitializer: "varianceScaling"
-  //   })
-  // );
-  // model.add(tf.layers.maxPooling2d({poolSize: [2, 2], strides: [2, 2]})); // 24 / 2 = 12
   model.add(
     tf.layers.dense({
       units: binarySize,
@@ -63,7 +52,8 @@ export const trainDivisibleModel = model => async ({
         x: decimalToBinaryArray(num),
         y: [Number(num % denom === 0), Number(num % denom !== 0)]
       };
-    })
+    }),
+  animationDelayTime = 1500
 } = {}) => {
   const optimizer = tf.train.sgd(learningRate);
   model.compile({
@@ -73,16 +63,9 @@ export const trainDivisibleModel = model => async ({
   });
   for (let i = 0; i < cycles; i++) {
     const xs = tf.tensor(trainingData.map(({ x }) => x));
-    // .reshape([trainingData.length, binarySize, 1, 1]);
     const ys = tf.tensor(trainingData.map(({ y }) => y));
-
-    // console.log("xs: ", xs.toString());
-    // console.log(
-    //   "xs.reshape: ",
-    //   xs.reshape([trainingData.length, binarySize, 1, 1]).toString()
-    // );
     onCycleComplete(await model.fit(xs, ys));
-    await wait(1500);
+    await wait(animationDelayTime);
   }
   return model;
 };
