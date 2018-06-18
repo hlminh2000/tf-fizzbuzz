@@ -9,6 +9,7 @@ import {
   decimalToBinaryArray
 } from "../ml/index.js";
 import { maxDec } from "../ml/divisibleModel";
+export { trainFizzBuzzModel } from "../ml/index.js";
 
 export const divBy3Model = createDivisibleModel();
 export const divBy5Model = createDivisibleModel();
@@ -27,7 +28,7 @@ export const startDivisisbilityTraining = async ({
   ]);
 };
 
-export const testModel = async ({
+export const testDivisibleModel = async ({
   model = divBy3Model,
   range: { from = 0, to = 255 } = {},
   threshold = 0.5,
@@ -49,23 +50,29 @@ export const testModel = async ({
   return predictions;
 };
 
-export const startFizzBuzzInferrence = async () => {
+export const testFizzBuzzModel = async () => {
+  const results = [];
   for (let i = 30000; i <= 30100; i++) {
     const data = await fizzBuzzModel
       .predict(tf.tensor([[Number(i % 3 === 0), Number(i % 5 === 0)]]))
       .data();
-    const [fizz, buzz, fizzBuzz] = data;
+    const [none, fizz, buzz, fizzBuzz] = data;
     const isCategory = prob => prob > 0.9;
-    console.log(
-      `${i}: `,
-      isCategory(fizz)
-        ? "fizz"
-        : isCategory(buzz) ? "buzz" : isCategory(fizzBuzz) ? "fizzBuzz" : i,
-      i % 3 === 0 && i % 15 !== 0
-        ? "fizz"
-        : i % 5 === 0 && i % 15 !== 0 ? "buzz" : i % 15 === 0 ? "fizzBuzz" : i
-    );
+    const prediction = [
+      isCategory(none),
+      isCategory(fizz),
+      isCategory(buzz),
+      isCategory(fizzBuzz)
+    ];
+    const actual = [
+      i % 3 !== 0 && i % 5 !== 0 && i % 15 !== 0,
+      i % 3 === 0 && i % 15 !== 0,
+      i % 5 === 0 && i % 15 !== 0,
+      i % 15 === 0
+    ];
+    results.push({ num: i, prediction, actual });
   }
+  return results;
 };
 
 export const generateTrainingData = ({ denom, percentage }) =>
