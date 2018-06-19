@@ -3,6 +3,8 @@ import "../App.css";
 import { withState, compose } from "recompose";
 import { ModelTrainer } from "../components/ModelTrainer";
 import createFizzBuzzCategoryTrainingData from "../scripts/createTrainingData";
+import Component from "react-component-component";
+import { range } from "lodash";
 import * as tf from "@tensorflow/tfjs";
 import {
   divBy3Model,
@@ -14,9 +16,7 @@ import {
   testFizzBuzzModel,
   generateTrainingData
 } from "./models";
-import { decimalToBinaryArray } from "../ml/divisibleModel";
-import Component from "react-component-component";
-import { range } from "lodash";
+import { decimalToBinaryArray, maxDec } from "../ml/divisibleModel";
 
 export default compose(
   withState("isTraining", "setIsTraining", false),
@@ -203,6 +203,8 @@ export default compose(
               <div style={{ padding: 40 }}>
                 from:{" "}
                 <input
+                  max={maxDec}
+                  min={0}
                   type="number"
                   value={from}
                   onChange={({ target: { value } }) =>
@@ -211,11 +213,14 @@ export default compose(
                 />{" "}
                 to:{" "}
                 <input
+                  max={maxDec}
+                  min={0}
                   type="number"
                   value={to}
                   onChange={({ target: { value } }) => setState({ to: value })}
                 />
                 <button
+                  disabled={isTraining}
                   onClick={async () => {
                     const fizzBuzzInputs = (await Promise.all(
                       range(from, to).map(num => {
